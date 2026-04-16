@@ -109,7 +109,7 @@ This creates a **variable** called `bpm` that you can set in the inspector. Afte
 
 ![BPM configuration](./screenshots/16.webp)
 
-Now, we need the conductor to actually calculate the beat on every frame. We'll use the formula `beat = song position (in seconds) x BPM / 60`. In the `_process` function, remove the `pass` statement and add the following:
+Now, we need the conductor to actually calculate the beat on every frame. We'll use the formula `beat = song position (in seconds) x BPM / 60`. In the `_process` function, remove the `pass` statement (which literally means "do nothing" just like in Python) and add the following:
 
 ```gdscript
 func _process(delta: float) -> void:
@@ -151,3 +151,90 @@ func _process(delta: float) -> void:
 Since the `_ready` function is unused, you can remove it from your code, or you can keep it there; it won't do anything.
 
 Alright, time to make the lanes and the notes!
+
+## Drawing the game
+
+Don't worry, you won't be the one doing the drawing (I can't draw at all). Godot will! You just need to tell it how to do that.
+
+If you think about our game interface, there are only a few things we need to display:
+
+- Five vertical lines that create four lanes for the notes to fall
+- Four labels that tell the players what keys to press
+- A horizontal judgement line
+- The individual notes themselves
+- A current score label
+
+Let's draw them one by one!
+
+First, attach a script to the root node of your scene, which is probably called something like "Node2D".
+
+![Added a script to the root node](./screenshots/17.webp)
+
+Now, add a function called `_draw`. This is where we'll be drawing our game interface. (You can add this function anywhere; I'll put it below `_ready` and `_process`.)
+
+```gdscript
+func _draw() -> void:
+    pass
+```
+
+We'll now draw the elements one by one. First, the vertical lines and the key labels: (You should add each of these code blocks below to the body of the `_draw` function, which means you'll need to indent them appropriately.)
+
+```gdscript
+for i in 5:
+    var start = Vector2(100 * i + 200, 0)
+    var end = Vector2(100 * i + 200, 720)
+    draw_line(start, end, Color.WHITE)
+    if i < 4:
+        var label_pos = Vector2(100 * (i+0.5) + 200, 620 + 30)
+        draw_string(ThemeDB.fallback_font, label_pos, str(i+1), HORIZONTAL_ALIGNMENT_CENTER)
+```
+
+Breaking down this code:
+
+- `for i in 5` means "run the following code for each `i` value from 0 to 4". It's the equivalent of `for i in range(5)` in Python. (In fact, `range` works in Godot too, but you can omit it for brevity.)
+- `draw_line` draws a line between two points, represented as `Vector2`s (basically fancy tuples of two numbers).
+  - We make each lane 100 pixels wide and leave a 200-pixel blank space on the left side.
+- Then, we use `draw_string` to draw the label text. For me, since I used the number keys, it's as simple as `str(i+1)` to get the key corresponding to each lane. If you used different keys, you may need to use an array or a bunch of `if` statements.
+
+Next, we'll draw the judgement line:
+
+```gdscript
+var judge_start = Vector2(200, 620)
+var judge_end = Vector2(100 * 4 + 200, 620)
+draw_line(judge_start, judge_end, Color.WHITE)
+```
+
+Not much to talk about here; we set the judgement line at Y=620 and make it span all four lanes.
+
+Next, we'll draw the notes. But wait - we don't have the notes yet! We need to first define where the notes should be.
+
+(P.S. Your code at the end of this section should look like:)
+
+```gdscript
+extends Node2D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+    pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+    pass
+
+func _draw() -> void:
+    for i in 5:
+        var start = Vector2(100 * i + 200, 0)
+        var end = Vector2(100 * i + 200, 720)
+        draw_line(start, end, Color.WHITE)
+        if i < 4:
+            var label_pos = Vector2(100 * (i+0.5) + 200, 620 + 30)
+            draw_string(ThemeDB.fallback_font, label_pos, str(i+1), HORIZONTAL_ALIGNMENT_CENTER)
+
+    var judge_start = Vector2(200, 620)
+    var judge_end = Vector2(100 * 4 + 200, 620)
+    draw_line(judge_start, judge_end, Color.WHITE)
+```
+
+## Defining notes (aka charting)

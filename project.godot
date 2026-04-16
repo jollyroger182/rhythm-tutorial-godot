@@ -11,8 +11,15 @@ config_version=5
 [application]
 
 config/name="rhythm-tutorial-godot"
+run/main_scene="uid://bk7dhk6jipral"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
 
 [editor_plugins]
 

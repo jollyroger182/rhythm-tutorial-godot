@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://bk7dhk6jipral"]
 
+[ext_resource type="Script" uid="uid://bvbe2bw3xx65m" path="res://main.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://cdkyf61k3brpo" path="res://conductor.gd" id="1_ig7tw"]
 
 [node name="Node2D" type="Node2D" unique_id=760477272]
+script = ExtResource("1_0xm2m")
 
 [node name="Conductor" type="AudioStreamPlayer" parent="." unique_id=753208351]
 autoplay = true
