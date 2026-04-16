@@ -66,3 +66,23 @@ Now you can close the Project Settings window. And it's finally time to...
 First things first: we won't be making a 3D rhythm game (though it might be a fun idea). On the top of your editor, switch to the "2D" tab. Next, you should see a purple-ish rectangle on the canvas. This is the size of your viewport; things outside this rectangle won't be shown. Pan the editor canvas with your middle mouse button and zoom with the scroll wheel until the viewport is center and large on your screen.
 
 ![2D editor canvas](./screenshots/8.webp)
+
+With that out of the way, we can create our main scene! It will be 2D, so select "2D Scene" in the scene tree section of the editor (the top left). Now, save it with Cmd/Ctrl+S, and name your scene "main.tscn".
+
+![Main scene setup](./screenshots/9.webp)
+
+What's a rhythm game without music? We need a music player to play the track for us and to track the beat of the song. In my rhythm games, I call this component the "conductor". On the scene tree, select the "+" button on the very top-left corner (or press its shortcut, Cmd/Ctrl+A), and search for "AudioStreamPlayer". Add it to your scene. (Make sure you don't select "AudioStreamPlayer2D" instead! It contains proximity features we don't need for our project.)
+
+![Adding an AudioStreamPlayer](./screenshots/10.webp)
+
+Next up, we'll configure our music player. Double click on your newly created AudioStreamPlayer in the scene tree and rename it to "Conductor". Then, in the inspector to the right of the window, check the "Autoplay" option so our music starts playing immediately.
+
+But hey, how do we add music? It's easy! First, drag a song to the filesystem to the bottom left of the window. Then, drag the imported song to the "Stream" slot in the inspector (where it says "&lt;empty>" now). I'll be using [this song](./16-Bit%20Beat%20Em%20All%20_Clement%20Panchout.wav); you can use the same one to follow along, or you can use your own (but you'll need to figure out the BPM yourself)!
+
+![Dragging a file to the Godot filesystem](./screenshots/11.webp)
+
+![Adding the imported music to the AudioStreamPlayer](./screenshots/12.webp)
+
+Your finished configuration should look like this.
+
+![Complete AudioStreamPlayer configuration](./screenshots/13.webp)

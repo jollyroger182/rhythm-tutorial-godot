@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bk7dhk6jipral"]
+
+[node name="Node2D" type="Node2D" unique_id=760477272]
+
+[node name="Conductor" type="AudioStreamPlayer" parent="." unique_id=753208351]
+autoplay = true
