@@ -59,7 +59,7 @@ After the configuration, the Input Map tab should look something like this.
 
 Now you can close the Project Settings window. And it's finally time to...
 
-## Making our main scene
+## Music & beats
 
 ... start coding our game!
 
@@ -86,3 +86,68 @@ But hey, how do we add music? It's easy! First, drag a song to the filesystem to
 Your finished configuration should look like this.
 
 ![Complete AudioStreamPlayer configuration](./screenshots/13.webp)
+
+Now, we need to teach the conductor how to count beats. To do this, we need to attach a **script** to the conductor. Godot uses GDScript as its scripting language, which is easy to learn and quite similar to Python.
+
+To attach a script, select the conductor in the scene tree, and press the icon that looks like a scroll with a plus sign. In the popup window, leave everything as default and select "Create".
+
+![Creating a script](./screenshots/14.webp)
+
+You should be greeted with this screen:
+
+![Created script editor](./screenshots/15.webp)
+
+Here, `func` defines a **function**. `_ready` is a special function that will be called "when the node enters the scene tree for the first time"; in other words, when the scene is initialized. `_delta` is a special function that will be called on every single frame of your game. Lines that start with a `#` are comments and are ignored by Godot.
+
+Remember, we need the conductor to track the current beat so all the other parts of our game can function. To do this, it needs to know the BPM! At the start of the script, below `extends AudioStreamPlayer`, add this line:
+
+```gdscript
+@export var bpm = 120
+```
+
+This creates a **variable** called `bpm` that you can set in the inspector. After you save the script with Cmd/Ctrl+S, you should be able to see the newly created variable on the right hand side! Set this to the BPM of the song you chose. If you used the song I did, the BPM is 162.
+
+![BPM configuration](./screenshots/16.webp)
+
+Now, we need the conductor to actually calculate the beat on every frame. We'll use the formula `beat = song position (in seconds) x BPM / 60`. In the `_process` function, remove the `pass` statement and add the following:
+
+```gdscript
+func _process(delta: float) -> void:
+    beat = get_playback_position() * bpm / 60
+```
+
+When you save, you'll see that Godot gives an error!
+
+```plaintext
+Error at (13, 5): Identifier "beat" not declared in the current scope.
+```
+
+This is because we tried to store a value into a variable, `beat`, which is not declared. In GDScript, unlike Python, you need to declare variables you use using `var` (you've already seen this with the BPM!). Since we want the other parts of your game to access this variable, we'll declare it in the file's global scope, instead of in the `_process` function. Add this code below your BPM variable:
+
+```gdscript
+var beat := 0.0
+```
+
+Now, the error is gone, and your conductor is complete! Congratulations! Your final code should look like this:
+
+```gdscript
+extends AudioStreamPlayer
+
+@export var bpm = 120
+
+var beat := 0.0
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	beat = get_playback_position() * bpm / 60
+```
+
+Since the `_ready` function is unused, you can remove it from your code, or you can keep it there; it won't do anything.
+
+Alright, time to make the lanes and the notes!
