@@ -223,6 +223,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
     pass
 
+
 func _draw() -> void:
     for i in 5:
         var start = Vector2(100 * i + 200, 0)
@@ -238,3 +239,53 @@ func _draw() -> void:
 ```
 
 ## Defining notes (aka charting)
+
+Our rhythm game will be quite simple, and it'll only have tap notes, where the player will tap a key when the note reaches the judgement line. Thus, we just need to define the lanes that notes will fall from and the beat that it reaches the judgement line.
+
+> **Why do we use beats?** It's the de facto standard to use beats instead of time in rhythm games. It makes things like charting a lot easier, since you don't need to define the timestamp, which may or may not be a whole number. Beats are generally much nicer to work with.
+
+We will define notes by creating a `notes` variable, which is made of an array of arrays. Each of the subarrays represents the notes in a single lane, and the values in these subarrays are the beats at which a note will appear on this lane. If that was a bit confusing, don't worry! Check out this example:
+
+```gdscript
+var notes = [
+    [2, 7],
+    [3, 8],
+    [4, 9],
+    [5, 10]
+]
+```
+
+This array defines 8 notes, 2 on each lane. In fact, this creates the staircase pattern that you saw at the very beginning of the guide. You can put this code below the line `extends Node2D`. I encourage you to then tweak the notes yourself to make the game a bit more interesting!
+
+Next, we need to draw in the notes. Back in our `_draw` function, add the following lines:
+
+```gdscript
+for i in 4:
+    for note in notes[i]:
+        var y = 620 + 100 * ($Conductor.beat - note)
+        var start = Vector2(100 * i + 200, y)
+        var end = Vector2(100 * (i+1) + 200, y)
+        draw_line(start, end, Color.WHITE, 5)
+```
+
+Breaking down this code:
+
+- We use a nested `for` loop, the outer one to iterate through all four lanes, and the inner one to iterate through each note.
+- We calculate the Y coordinate for the note by taking the judgement line's Y coordinate and adding the difference in beats times 100 to it. This means the notes will fall down as its beat draws closer.
+  - `$Conductor` references the "Conductor" node that we configured earlier, where we defined a `beat` variable that tracks the current beat.
+- We then draw the note as a 5-pixel wide line spanning a single lane.
+
+Now let's try our game! Click the "Play" button on the top right corner. (If it asks you to select a main scene, choose "Select Current".) If everything goes well, you should hear the music playing, and the notes... wait, why aren't they moving?
+
+![The game](./screenshots/18.webp)
+
+This is because, by default, Godot only calls the `_draw` function once at the start of the scene. To have it update the screen every frame, we need to call the `queue_redraw` function in `_process`. Let's do that by changing the definition of `_process` to:
+
+```gdscript
+func _process(delta: float) -> void:
+    queue_redraw()
+```
+
+Now if you run your game again, the notes should be falling! Congrats! But pressing the keys don't work yet.
+
+## Responding to input

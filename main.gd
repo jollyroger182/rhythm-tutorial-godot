@@ -1,5 +1,12 @@
 extends Node2D
 
+var notes = [
+	[2, 7],
+	[3, 8],
+	[4, 9],
+	[5, 10]
+]
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -8,7 +15,8 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	queue_redraw()
+
 
 func _draw() -> void:
 	for i in 5:
@@ -22,3 +30,10 @@ func _draw() -> void:
 	var judge_start = Vector2(200, 620)
 	var judge_end = Vector2(100 * 4 + 200, 620)
 	draw_line(judge_start, judge_end, Color.WHITE)
+	
+	for i in 4:
+		for note in notes[i]:
+			var y = 620 + 100 * ($Conductor.beat - note)
+			var start = Vector2(100 * i + 200, y)
+			var end = Vector2(100 * (i+1) + 200, y)
+			draw_line(start, end, Color.WHITE, 5)
