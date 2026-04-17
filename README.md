@@ -140,12 +140,12 @@ var beat := 0.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+    pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	beat = get_playback_position() * bpm / 60
+    beat = get_playback_position() * bpm / 60
 ```
 
 Since the `_ready` function is unused, you can remove it from your code, or you can keep it there; it won't do anything.
@@ -289,3 +289,179 @@ func _process(delta: float) -> void:
 Now if you run your game again, the notes should be falling! Congrats! But pressing the keys don't work yet.
 
 ## Responding to input
+
+Let's have the keys work! In Godot, one way to handle keyboard input is by using the `_unhandled_key_input` function. This function is called for each keypress that isn't handled by control elements (like buttons, text inputs, etc). In this function, we'll check if each of our four lane keys are pressed, and if they are, we'll remove the first note from that lane. Add the following code at the end of the file:
+
+```gdscript
+func _unhandled_key_input(event: InputEvent) -> void:
+    if event.is_action_pressed("1"):
+        _handle_lane_press(0)
+    elif event.is_action_pressed("2"):
+        _handle_lane_press(1)
+    elif event.is_action_pressed("3"):
+        _handle_lane_press(2)
+    elif event.is_action_pressed("4"):
+        _handle_lane_press(3)
+
+
+func _handle_lane_press(lane: int) -> void:
+    var lane_notes = notes[lane]
+    if lane_notes.is_empty():
+        return
+    lane_notes.pop_front()
+```
+
+The code should be relatively straightforward, but take note! The parameter passed to `is_action_pressed` is the **action name** (i.e., the things you defined in the input map), not the keys themselves. In our case, we defined the actions "1", "2", "3", and "4", but if you didn't define them in the Project Settings, this won't catch the keys.
+
+Now if you play your game and press the keys you defined, you should see the notes disappearing!
+
+![The game works with inputs](./screenshots/19.webp)
+
+However, there's a bit of a problem... it's not very rhythmical right now. I can literally just spam the keys to hit all of the notes. As you can see from the screenshot, I tapped the 1 key twice and both of the notes on lane 1 got cleared, even though the second one is way far ahead. We need to check if the notes are close enough to hit before removing them! In `_handle_lane_press`, remove `lane_notes.pop_front()` and add the following lines:
+
+```gdscript
+var note = lane_notes[0]
+
+if abs($Conductor.beat - note) < 0.5:
+    lane_notes.pop_front()
+```
+
+This checks if the note is within half a beat of the current music position, and only lets you clear the note if it is. Now you can no longer spam to clear all the notes!
+
+But something else annoying happens: if you miss a note, you can't hit any more notes on that lane in the future. This is because the old note stays in our notes array. We should delete notes that the player has missed! We can do this in `_process`. Add these lines of code to the `_process` function:
+
+```gdscript
+for i in 4:
+    var lane = notes[i]
+    while not lane.is_empty():
+        var note = lane[0]
+        if note < $Conductor.beat - 0.5:
+            lane.pop_front()
+        else:
+            break
+```
+
+This code deletes all the notes in each line that are more than half a beat late, which fixes our problem. You can now play your rhythm game!
+
+By the end of this section, your code should look like this:
+
+<details>
+<summary>Click to expand code</summary>
+
+```gdscript
+extends Node2D
+
+var notes = [
+	[2, 7],
+	[3, 8],
+	[4, 9],
+	[5, 10]
+]
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	queue_redraw()
+
+	for i in 4:
+		var lane = notes[i]
+		while not lane.is_empty():
+			var note = lane[0]
+			if note < $Conductor.beat - 0.5:
+				lane.pop_front()
+			else:
+				break
+
+
+func _draw() -> void:
+	for i in 5:
+		var start = Vector2(100 * i + 200, 0)
+		var end = Vector2(100 * i + 200, 720)
+		draw_line(start, end, Color.WHITE)
+		if i < 4:
+			var label_pos = Vector2(100 * (i+0.5) + 200, 620 + 30)
+			draw_string(ThemeDB.fallback_font, label_pos, str(i+1), HORIZONTAL_ALIGNMENT_CENTER)
+
+	var judge_start = Vector2(200, 620)
+	var judge_end = Vector2(100 * 4 + 200, 620)
+	draw_line(judge_start, judge_end, Color.WHITE)
+
+	for i in 4:
+		for note in notes[i]:
+			var y = 620 + 100 * ($Conductor.beat - note)
+			var start = Vector2(100 * i + 200, y)
+			var end = Vector2(100 * (i+1) + 200, y)
+			draw_line(start, end, Color.WHITE, 5)
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event.is_action_pressed('1'):
+		_handle_lane_press(0)
+	elif event.is_action_pressed("2"):
+		_handle_lane_press(1)
+	elif event.is_action_pressed("3"):
+		_handle_lane_press(2)
+	elif event.is_action_pressed("4"):
+		_handle_lane_press(3)
+
+
+func _handle_lane_press(lane: int) -> void:
+	var lane_notes = notes[lane]
+	if lane_notes.is_empty():
+		return
+
+	var note = lane_notes[0]
+
+	if abs($Conductor.beat - note) < 0.5:
+		lane_notes.pop_front()
+```
+
+</details>
+
+## Adding a score
+
+The last thing we'll do together in this guide is adding a score label. For simplicity, we'll increase the score by 1 for each note you hit.
+
+First, we need a variable to store the score. Add this below your note definitions:
+
+```gdscript
+var score := 0
+```
+
+Then, we need to increment the score whenever the user hits a note on time. Add this code inside the `if abs($Conductor.beat - note) < 0.5` check in `_handle_lane_press`:
+
+```gdscript
+score += 1
+```
+
+Finally, we need to draw the score text. Add this code to the `_draw` function:
+
+```gdscript
+draw_string(ThemeDB.fallback_font, Vector2(60, 60), "Score: " + str(score))
+```
+
+This draws the score with the default font at (60, 60). Running our game now, you should see the score counter!
+
+![Game with score counter](./screenshots/20.webp)
+
+## Conclusion
+
+This concludes this guide for a basic rhythm game! You now have a foundation on which to make the game your own. Some ideas:
+
+- Add a more nuanced scoring system with judgement tiers (Perfect/Good/Bad/Miss)
+- Display current and max combo below the score
+- Add a pause menu that appears when you press Escape
+- Make multiple levels and a menu that lets you select them
+- Add assets and colors to make the game look better
+- ... and more!
+
+Once you're done, submit your game to [#remixed](https://remixed.hackclub.com)! We can't wait to see what you cook up :D
+
+If you have any questions, feel free to reach out to [@Jolly](https://hackclub.enterprise.slack.com/team/U08CJCZ2Z9S) on the Hack Club Slack!
+
+~~ Jolly
