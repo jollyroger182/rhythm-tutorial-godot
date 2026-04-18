@@ -1,4 +1,4 @@
-# Build a rhythm game in Godot! (Draft)
+# Build a rhythm game in Godot!
 
 Let's make a rhythm game with Godot!
 
