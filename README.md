@@ -464,4 +464,6 @@ Once you're done, submit your game to [#remixed](https://remixed.hackclub.com)! 
 
 If you have any questions, feel free to reach out to [@Jolly](https://hackclub.enterprise.slack.com/team/U08CJCZ2Z9S) on the Hack Club Slack!
 
+P.S.: In the coming days/weeks, this guide will be updated and/or extended in include info like how to customize your game, how to make a level editor, etc. Make sure you stay tuned!
+
 ~~ Jolly
